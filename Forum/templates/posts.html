@@ -1,0 +1,38 @@
+{% extends 'flatpages/default.html' %}
+
+
+{% block title %}
+Posts
+{% endblock title %}
+
+{% block content %}
+    <h1>Все объявления</h1>
+    <h3>{{ time_now|date:'d M Y' }}</h3>
+
+    <hr>
+
+    {% if posts %}
+        <table>
+            <tr>
+                <td><b>Заголовок</b></td>
+                <td><b>Дата публикации</b></td>
+                <td><b>Содержание</b></td>
+                <!-- D5
+                {% if perms.news.change_post or perms.news.delete_post %}
+                <td>Действия</td>
+                {% endif %}-->
+            </tr>
+
+            {% for post in posts %}
+            <tr>
+                <td><a href="{% url 'post_detail' pk=post.id %}">{{ post.title }}</a></td>
+                <td>{{ post.time_in|date:'d M Y h i' }}</td>
+                <td>{{ post.text|truncatechars:40 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Объявлений нет!</h2>
+    {% endif %}
+
+{% endblock content %}
