@@ -8,7 +8,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 
 from .models import Post, Response
 from .filters import PostFilter, PrivateFilter
-from .forms import PostForm
+from .forms import PostForm, ResponseForm
 
 
 class PostList(ListView):
@@ -97,7 +97,7 @@ class PostDelete(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
 class ResponseCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     permission_required = ('mainapp.add_response',)
     raise_exception = True
-    form_class = PostForm
+    form_class = ResponseForm
     model = Response
     template_name = 'response_edit.html'
 
@@ -112,7 +112,7 @@ class ResponseCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
 class ResponseEdit(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
     permission_required = ('mainapp.change_response',)
     raise_exception = True
-    form_class = PostForm
+    form_class = ResponseForm
     model = Response
     template_name = 'response_edit.html'
 
@@ -127,7 +127,7 @@ class ResponseEdit(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
 class ResponseDelete(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
     permission_required = ('mainapp.delete_response',)
     raise_exception = True
-    form_class = PostForm
+    form_class = ResponseForm
     model = Response
     template_name = 'response_delete.html'
 

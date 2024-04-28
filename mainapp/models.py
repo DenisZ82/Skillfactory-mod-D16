@@ -35,7 +35,7 @@ class Post(models.Model):
 
 class Response(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='responses')
     text = models.TextField()
     time_in = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=False, verbose_name='Статус')

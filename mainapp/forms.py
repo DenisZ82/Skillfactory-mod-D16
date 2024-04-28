@@ -21,4 +21,3 @@ class ResponseForm(forms.ModelForm):
         fields = [
             'text'
         ]
-
