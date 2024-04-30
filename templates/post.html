@@ -26,6 +26,7 @@ Post
 
             {% for response in post.responses.all %}
             <tr>
+                {% if response.status == True %}
                 <td>{{ response.author.username }}</td>
                 <td>{{ response.time_in|date:'d M Y h i' }}</td>
                 <td>{{ response.text|safe }}</td>
@@ -38,6 +39,7 @@ Post
                         <a href="{% url 'response_delete' response.id %}">Удалить</a>
                     {% endif %}
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </table>

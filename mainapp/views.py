@@ -3,7 +3,7 @@ from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
 from .models import Post, Response
@@ -105,6 +105,7 @@ class ResponseCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
         response = form.save(commit=False)
         if self.request.method == 'POST':
             response.author = self.request.user
+            response.post_id = self.kwargs.get('pk')
         response.save()
         return super().form_valid(form)
 
@@ -117,7 +118,7 @@ class ResponseEdit(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
     template_name = 'response_edit.html'
 
     def dispatch(self, request, *args, **kwargs):
-        author = Post.objects.get(pk=self.kwargs.get('pk')).author.username
+        author = Response.objects.get(pk=self.kwargs.get('pk')).author.username
         if self.request.user.username == 'admin' or self.request.user.username == author:
             return super().dispatch(request, *args, **kwargs)
         else:
@@ -127,12 +128,16 @@ class ResponseEdit(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
 class ResponseDelete(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
     permission_required = ('mainapp.delete_response',)
     raise_exception = True
-    form_class = ResponseForm
     model = Response
     template_name = 'response_delete.html'
 
+    # для возврата к странице объявления, где был удален отклик
+    def get_success_url(self):
+        return reverse_lazy('post_detail', args=[self.object.post_id])
+
+    # для проверки залогиненого пользователя на авторство отклика
     def dispatch(self, request, *args, **kwargs):
-        author = Post.objects.get(pk=self.kwargs.get('pk')).author.username
+        author = Response.objects.get(pk=self.kwargs.get('pk')).author.username
         if self.request.user.username == 'admin' or self.request.user.username == author:
             return super().dispatch(request, *args, **kwargs)
         else:
