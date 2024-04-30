@@ -10,6 +10,7 @@ Post
     <hr>
     <div align="left">{{ post.text | safe}}</div>
     <p></p>
+
     <hr>
     {% if request.user.is_authenticated %}
     <a href="{% url 'response_create' pk=post.id %}">Добавить отклик</a>
@@ -21,6 +22,7 @@ Post
                 <td><b>Автор</b></td>
                 <td><b>Дата публикации</b></td>
                 <td><b>Текст отклика</b></td>
+                <td><b>Статус отклика</b></td>
 
             </tr>
 
@@ -30,7 +32,14 @@ Post
                 <td>{{ response.author.username }}</td>
                 <td>{{ response.time_in|date:'d M Y h i' }}</td>
                 <td>{{ response.text|safe }}</td>
-
+                <td>
+                    {% if response.status == True %}
+                        <b>Принят</b>
+                    {% else %}
+                        <b>В ожидании</b>
+                    {% endif %}
+                </td>
+                <td> | </td>
                 <td>
                     {% if perms.mainapp.change_response %}
                         <a href="{% url 'response_edit' response.id %}">Изменить</a>
