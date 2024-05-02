@@ -29,6 +29,9 @@ class Post(models.Model):
     def __str__(self):
         return f'{self.title}'
 
+    def cat_(self):
+        return self.category.field.choices[0][1]
+
     def get_absolute_url(self):
         return reverse('post_detail', args=[str(self.id)])
 

@@ -31,10 +31,9 @@ Posts
                 <td><b>Автор</b></td>
                 <td><b>Дата публикации</b></td>
                 <td><b>Содержание</b></td>
-                <!--
-                {% if perms.news.change_post or perms.news.delete_post %}
-                <td>Действия</td>
-                {% endif %}-->
+                {% if perms.mainapp.change_post or perms.mainapp.delete_post %}
+                <td><b>Действия</b></td>
+                {% endif %}
             </tr>
 
             {% for post in posts %}

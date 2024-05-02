@@ -7,6 +7,7 @@ Post
 {% block content %}
     <h1>{{ post }}</h1>
     <h3>Автор: {{post.author}}</h3>
+    <h3>Категория: {{ post.get_category_display }}</h3>
     <hr>
     <div align="left">{{ post.text | safe}}</div>
     <p></p>
@@ -28,7 +29,7 @@ Post
 
             {% for response in post.responses.all %}
             <tr>
-                {% if response.status == True %}
+                {% if response.status == True or request.user == post.author or request.user == response.author %}
                 <td>{{ response.author.username }}</td>
                 <td>{{ response.time_in|date:'d M Y h i' }}</td>
                 <td>{{ response.text|safe }}</td>
@@ -46,6 +47,21 @@ Post
                     {% endif %}
                     {% if perms.mainapp.delete_response %}
                         <a href="{% url 'response_delete' response.id %}">Удалить</a>
+                    {% endif %}
+                </td>
+                <td> | </td>
+                <td>
+                    {% if request.user == post.author %}
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if response.status == True %}
+                        <button disabled>Принять</button>
+                        <button name="action" value="reject">Отклонить</button>
+                        {% else %}
+                        <button name="action" value="accept">Принять</button>
+                        <button disabled>Отклонить</button>
+                        {% endif %}
+                    </form>
                     {% endif %}
                 </td>
                 {% endif %}

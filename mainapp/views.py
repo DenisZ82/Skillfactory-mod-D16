@@ -1,12 +1,16 @@
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.mail import send_mail
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
-from .models import Post, Response
+from Forum import settings
+from .models import Post, Response, User
 from .filters import PostFilter, PrivateFilter
 from .forms import PostForm, ResponseForm
 
@@ -103,10 +107,18 @@ class ResponseCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         response = form.save(commit=False)
+        post = get_object_or_404(Post, id=self.kwargs['pk'])
         if self.request.method == 'POST':
             response.author = self.request.user
             response.post_id = self.kwargs.get('pk')
         response.save()
+        send_mail(
+            subject=f'Отклик на объявление {post}',
+            message=f'На объявление {post} был добавлен отклик пользователем {self.request.user}: {response.text}. '
+                    f'Ссылка на объявление: http://127.0.0.1:8000/posts/{response.post.id}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[User.objects.get(pk=post.author_id).email]
+        )
         return super().form_valid(form)
 
 
@@ -161,3 +173,23 @@ class ResponseList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['filterset'] = self.filterset
         return context
+
+
+@login_required
+@csrf_protect
+def accept_reject(request, **kwargs):
+    if request.method == 'POST':
+        response_id = request.POST.get('response_id')
+        response = Response.objects.get(id=response_id)
+        action = request.POST.get('action')
+
+        if action == 'accept':
+            Response.objects.filter(user=request.user, response=response).update(status=True)
+        elif action == 'reject':
+            Response.objects.filter(user=request.user, response=response).update(status=False)
+
+    return render(request, 'post.html')
+
+
+
+
