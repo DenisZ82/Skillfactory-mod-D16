@@ -22,12 +22,16 @@ from django.views.decorators.cache import never_cache
 from django.conf import settings
 
 from ckeditor_uploader.views import upload, browse
+from django.views.generic import TemplateView
 
+from mainapp.views import ResponseList
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('pages/', include('django.contrib.flatpages.urls')),
     path('posts/', include('mainapp.urls')),
+    path('private/', ResponseList.as_view(), name='private'),
+    path('accounts/', include('allauth.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     re_path(r'^upload/', login_required(upload), name='ckeditor_upload'),
     re_path(r'^browse/', login_required(never_cache(browse)), name='ckeditor_browse'),
