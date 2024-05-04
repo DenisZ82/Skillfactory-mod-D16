@@ -6,6 +6,70 @@ Post
 
 {% block content %}
     <h1>{{ post }}</h1>
+    <h3>Автор: {{post.author}}</h3>
+    <h3>Категория: {{ post.get_category_display }}</h3>
     <hr>
-    {{ post.text | safe}}
+    <div align="left">{{ post.text | safe}}</div>
+    <p></p>
+
+    <hr>
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'response_create' pk=post.id %}">Добавить отклик</a>
+    {% endif %}
+
+    {% if post.responses.all %}
+        <table>
+            <tr>
+                <td><b>Автор</b></td>
+                <td><b>Дата публикации</b></td>
+                <td><b>Текст отклика</b></td>
+                <td><b>Статус отклика</b></td>
+
+            </tr>
+
+            {% for response in post.responses.all %}
+            <tr>
+                {% if response.status == True or request.user == post.author or request.user == response.author %}
+                <td>{{ response.author.username }}</td>
+                <td>{{ response.time_in|date:'d M Y h i' }}</td>
+                <td>{{ response.text|safe }}</td>
+                <td>
+                    {% if response.status == True %}
+                        <b>Принят</b>
+                    {% else %}
+                        <b>В ожидании</b>
+                    {% endif %}
+                </td>
+                <td> | </td>
+                <td>
+                    {% if perms.mainapp.change_response %}
+                        <a href="{% url 'response_edit' response.id %}">Изменить</a>
+                    {% endif %}
+                    {% if perms.mainapp.delete_response %}
+                        <a href="{% url 'response_delete' response.id %}">Удалить</a>
+                    {% endif %}
+                </td>
+                <td> | </td>
+                <td>
+                    {% if request.user == post.author %}
+                    <form action="{% url 'accept_reject' response.id %}" method="post">
+                        {% csrf_token %}
+                        {% if response.status == True %}
+                        <button disabled>Принять</button>
+                        <button name="action" value="reject">Отклонить</button>
+                        {% else %}
+                        <button name="action" value="accept">Принять</button>
+                        <button disabled>Отклонить</button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Откликов нет!</h2>
+    {% endif %}
+
 {% endblock content %}

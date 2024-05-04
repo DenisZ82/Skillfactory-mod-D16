@@ -1,0 +1,35 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+Private
+{% endblock title %}
+
+{% block content %}
+<h2>Личный кабинет пользователя {{ request.user.username }}</h2>
+<hr>
+<form action="" method="get">
+    {{ filterset.form }}
+    <p></p>
+    <input type="submit" value="Найти" />
+</form>
+<p></p>
+<button><a href="/private">Сбросить фильтр</a> </button>
+<hr>
+<h3>Все отклики на объявление </h3>
+    {% if responses %}
+    {% for response in responses %}
+    <p>{{ response.author }}</p>
+    <p>{{ response.text }}</p>
+    <form action="{% url 'accept_reject' response.id %}" method="post">
+        {% csrf_token %}
+        {% if response.status == True %}
+        <button disabled>Принять</button>
+        <button name="action" value="reject">Отклонить</button>
+        {% else %}
+        <button name="action" value="accept">Принять</button>
+        <button disabled>Отклонить</button>
+        {% endif %}
+    </form>
+    {% endfor %}
+{% endif %}
+{% endblock content %}
