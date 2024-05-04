@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.mail import send_mail
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from Forum import settings
 from .models import Post, Response, User
@@ -179,17 +179,47 @@ class ResponseList(LoginRequiredMixin, ListView):
 @csrf_protect
 def accept_reject(request, **kwargs):
     if request.method == 'POST':
-        response_id = request.POST.get('response_id')
-        response = Response.objects.get(id=response_id)
+        # response_id = request.POST.get('response_id')
+        response = Response.objects.get(id=kwargs.get('pk'))
         action = request.POST.get('action')
+        post = get_object_or_404(Post, id=response.post.id)
 
         if action == 'accept':
-            Response.objects.filter(user=request.user, response=response).update(status=True)
+            response.status = True
+            response.save()
+            send_mail(
+                subject=f'Отклик принят',
+                message=f'Отклик на объявление {post} принят: {response.text}. '
+                        f'Ссылка на объявление: http://127.0.0.1:8000/posts/{response.post.id}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[User.objects.get(pk=response.author_id).email]
+            )
+
         elif action == 'reject':
-            Response.objects.filter(user=request.user, response=response).update(status=False)
+            response.status = False
+            response.save()
+            send_mail(
+                subject=f'Отклик отклонен',
+                message=f'Отклик на объявление {post} отклонен: {response.text}. '
+                        f'Ссылка на объявление: http://127.0.0.1:8000/posts/{response.post.id}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[User.objects.get(pk=response.author_id).email]
+            )
 
-    return render(request, 'post.html')
+    return redirect('post_detail', response.post_id)
 
 
+class ConfirmUser(UpdateView):
+    model = User
+    context_object_name = 'confirm_user'
 
+    def post(self, request, *args, **kwargs):
+        if 'code' in request.POST:
+            user = User.objects.filter(code=request.POST['code'])
+            if user.exists():
+                user.update(is_active=True)
+                user.update(code=None)
+            else:
+                return render(self.request, 'invalid_code.html')
 
+        return redirect('account_login')

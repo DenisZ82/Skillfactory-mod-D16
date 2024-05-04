@@ -151,6 +151,9 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 
+AUTH_USER_MODEL = 'mainapp.User'
+
+LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = '/posts'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/posts'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/posts'

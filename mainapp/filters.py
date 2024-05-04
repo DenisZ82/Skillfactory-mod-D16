@@ -1,5 +1,5 @@
 import django_filters
-from django_filters import FilterSet, DateTimeFilter, ModelMultipleChoiceFilter, ChoiceFilter, ModelChoiceFilter
+from django_filters import FilterSet, DateTimeFilter, ChoiceFilter, ModelChoiceFilter
 from django.forms import DateTimeInput
 
 
@@ -61,4 +61,3 @@ class PrivateFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super(PrivateFilter, self).__init__(*args, **kwargs)
         self.filters['post'].queryset = Post.objects.filter(author_id=kwargs['request'])
-

@@ -52,7 +52,7 @@ Post
                 <td> | </td>
                 <td>
                     {% if request.user == post.author %}
-                    <form method="post">
+                    <form action="{% url 'accept_reject' response.id %}" method="post">
                         {% csrf_token %}
                         {% if response.status == True %}
                         <button disabled>Принять</button>
